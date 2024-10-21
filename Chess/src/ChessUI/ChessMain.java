@@ -53,7 +53,7 @@ import ChessDataTypes.ChessMove;
 import ChessDataTypes.ChessMoves;
 import ChessDataTypes.ChessPiece;
 import ChessDataTypes.ChessPosition;
-import FilleUtilities.FilesUtils;
+import FileUtilities.FilesUtils;
 import OtherUtilities.ImageUtils;
 import SwingUtilities.SwingUtils;
 

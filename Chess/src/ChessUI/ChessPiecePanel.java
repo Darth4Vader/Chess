@@ -50,12 +50,11 @@ import ChessDataTypes.Chess;
 import ChessDataTypes.ChessData;
 import ChessDataTypes.ChessData.Piece;
 import ChessDataTypes.ChessData.TurnColor;
+import FileUtilities.FilesUtils;
 import ChessDataTypes.ChessMove;
 import ChessDataTypes.ChessMoves;
 import ChessDataTypes.ChessPiece;
 import ChessDataTypes.ChessPosition;
-import FilleUtilities.FilesUtils;
-import OtherUtilities.ImageUtils;
 import SwingUtilities.SwingUtils;
 
 public class ChessPiecePanel extends JPanel implements FocusListener, MouseMotionListener, MouseListener, AncestorListener {
