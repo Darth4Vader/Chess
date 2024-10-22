@@ -2,6 +2,8 @@ package ChessDataTypes;
 
 import javax.management.MalformedObjectNameException;
 
+import ChessDataTypes.ChessData.Move;
+import ChessDataTypes.ChessData.Piece;
 import ChessDataTypes.ChessException.ChessExceptionType;
 
 public class ChessMove implements ChessData {
@@ -167,85 +169,8 @@ public class ChessMove implements ChessData {
 	protected Move getMove() {
 		if(currentPosition == null || moveToPosition == null) return Move.MOVE_UNKOWN;
 		if(currentPosition.equals(moveToPosition)) return Move.MOVE_UNKOWN;
-		Move move = Move.MOVE_UNKOWN;
-		if(type == Piece.PAWN) {
-			if(color == TurnColor.BLACK) {
-					//Pawn Starts
-					if(rank == 1)
-						if(rank+2 == toRank && file == toFile && moveToPosition.isEmpty() && chess.isPositionEmpty(rank+1, file))
-							return Move.PAWN_START;
-					//Pawn Moves
-					if(rank+1 == toRank && file == toFile && moveToPosition.isEmpty())
-						return Move.MOVE;
-					//Pawn Captures (Capture or En Pasent)
-					if((file-1 == toFile || file+1 == toFile) && rank+1 == toRank)
-						return checkPawnCaptures();
-			} else
-			if(color == TurnColor.WHITE) {
-				//Pawn Starts
-				if(rank == 6)
-					if(rank-2 == toRank && file == toFile && moveToPosition.isEmpty() && chess.isPositionEmpty(rank-1, file))
-						return Move.PAWN_START;
-				//Pawn Moves
-				if(rank-1 == toRank && file == toFile && moveToPosition.isEmpty()) 
-					return Move.MOVE;
-				//Pawn Captures (Capture or En Pasent)
-				if((file-1 == toFile || file+1 == toFile) && rank-1 == toRank)
-					return checkPawnCaptures();
-			}
-		}
-		else if(type == Piece.KNIGHT) {
-			if(rank-1 == toRank) {
-				if(file-2 == toFile)
-					return isMoveOrCapture();
-				if(file+2 == toFile)
-					return isMoveOrCapture();
-			}
-			if(rank+1 == toRank) {
-				if(file-2 == toFile)
-					return isMoveOrCapture();
-				if(file+2 == toFile)
-					return isMoveOrCapture();
-			}
-			if(rank-2 == toRank) {
-				if(file-1 == toFile)
-					return isMoveOrCapture();
-				if(file+1 == toFile)
-					return isMoveOrCapture();
-			}
-			if(rank+2 == toRank) {
-				if(file-1 == toFile)
-					return isMoveOrCapture();
-				if(file+1 == toFile)
-					return isMoveOrCapture();
-			}
-		}
-		else if(type == Piece.KING) {
-			if(Math.abs(rank-toRank) == 1 && file == toFile)
-				return isMoveOrCapture();
-			if(rank==toRank && Math.abs(file-toFile) == 1)
-				return isMoveOrCapture();
-			if(Math.abs(rank-toRank) == 1 && Math.abs(file-toFile) == 1)
-				return isMoveOrCapture();
-			return checkCastling();
-		}
-		else {
-			if(type == Piece.BISHOP || type == Piece.QUEEN) {
-				move = moveOrCapture(1, 1, move);
-				move = moveOrCapture(1, -1, move);
-				move = moveOrCapture(-1, 1, move);
-				move = moveOrCapture(-1, -1, move);
-			}
-			if(type == Piece.ROOK || type == Piece.QUEEN) {
-				if(move == Move.MOVE_UNKOWN) {
-					move = moveOrCapture(1, 0, move);
-					move = moveOrCapture(-1, 0, move);
-					move = moveOrCapture(0, 1, move);
-					move = moveOrCapture(0, -1, move);
-				}
-			}
-		}
-		return move;
+		ChessPiece piece = currentPosition.getChessPiece();
+		return piece.getMove(this);
 	}
 	
 	public Move moveOrCapture(int rankLoop, int fileLoop, Move move) {
@@ -267,14 +192,14 @@ public class ChessMove implements ChessData {
 		return moveType == Move.CHECK;
 	}
 	
-	private Move isMoveOrCapture() {
+	protected Move isMoveOrCapture() {
 		if(moveToPosition.isEmpty())
 			return Move.MOVE;
 		else
 			return isCapture();
 	}
 	
-	private Move isCapture() {
+	protected Move isCapture() {
 		if(!moveToPosition.isEmpty()) {
 			TurnColor toColor = moveToPosition.getChessPiece().getColor();
 			Piece toType = moveToPosition.getChessPiece().getType();
@@ -290,85 +215,8 @@ public class ChessMove implements ChessData {
 		return Move.MOVE_UNKOWN;
 	}
 	
-	private Move checkPawnCaptures() {
-		Move move = isCapture();
-		if(!moveToPosition.isEmpty()) return move;
-		if(file > 0)
-			move = checkPawnEnPasent(0, -1, move);
-		if(file < FILE-1)
-			move = checkPawnEnPasent(0, 1, move);
-		return move;
-	}
-	
-	private Move checkPawnEnPasent(int rankLoop, int fileLoop, Move move) {
-		if(move != Move.MOVE_UNKOWN) return move;
-		int rank = this.rank + rankLoop;
-		int file = this.file + fileLoop;
-		ChessPosition playPosition = chess.getChessPosition(rank, file);
-		boolean isLegal = checkPawnEnPasent(playPosition);
-		if(isLegal) {
-			this.playPosition = playPosition;
-			return Move.EN_PASSANT;
-		}
-		return Move.MOVE_UNKOWN;
-	}
-	
-	/**
-	 * Special Chess move only for <strong>PAWN</strong> pieces.
-	 * @param piece
-	 * @return
-	 */
-	private boolean checkPawnEnPasent(ChessPosition position) {
-		if(position == null) return false;
-		ChessPiece piece = position.getChessPiece();
-		if(piece == null || currentPiece.isColor(piece) || !piece.isPiece(Piece.PAWN)) return false;
-		ChessMove lastOppositeMove = chess.getLastMove();
-		if(lastOppositeMove != null) {
-			ChessPosition lastMovedPosition = lastOppositeMove.getMoveToPosition();
-			if(position.equals(lastMovedPosition)) {
-				if(lastOppositeMove.getMoveName() == Move.PAWN_START) {
-					int rank = lastMovedPosition.getRank(), file = lastMovedPosition.getFile();
-					if(rank == this.rank && (file+1 == this.file || file-1 == this.file))
-						if((rank-1 == toRank || rank+1 == toRank) && file == toFile)
-							return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	private Move checkCastling() {
-		if(!moveToPosition.isEmpty()) return Move.MOVE_UNKOWN;
-		ChessPosition position;
-		if(this.file < this.toFile)
-			position = chess.getChessPosition(rank, 7);
-		else
-			position = chess.getChessPosition(rank, 0);
-		if(checkCastling(position)) {
-			playPosition = position;
-			return Move.CASTLING;
-		}
-		return Move.MOVE_UNKOWN;
-	}
-	
-	private boolean checkCastling(ChessPosition position) {
-		if(!(toFile == 2 || toFile == 6) && !(toRank == 0 || toRank == 7)) return false;
-		if(position == null) return false;
-		ChessPiece piece = position.getChessPiece();
-		if(piece == null || (!this.currentPosition.getChessPiece().isFirstMove() && !piece.isFirstMove())) return false;
-		if(!piece.isPiece(Piece.ROOK) || !currentPiece.isColor(piece)) return false;
-		int rank = position.getRank(), file = position.getFile();
-		if(rank != this.rank) return false;
-		if(this.file < file) {
-			for(int i = this.file+1;i < file; i++)
-				if(!chess.isPositionEmpty(rank, i))
-					return false;
-		}
-		else
-			for(int i = this.file-1;i > 0; i--)
-				if(!chess.isPositionEmpty(rank, i))
-					return false;
-		return true;
+	public void setPlayPosition(ChessPosition position) {
+		this.playPosition = position;
 	}
 	
 	public ChessPosition getMoveToPosition() {
@@ -393,7 +241,7 @@ public class ChessMove implements ChessData {
 		return chess.getChessPosition(rank, file-1);
 	}
 	
-	public void initiateChange() {
+	public void initiateChange() throws PromotionChooseException {
 		ChessPiece piece = currentPosition.getChessPiece();
 		if(piece != null && this.moveType != Move.MOVE_UNKOWN && this.moveType != Move.CHECK) {
 			if(playPosition != null) {
@@ -408,10 +256,30 @@ public class ChessMove implements ChessData {
 			}
 			piece.setFirstTurn(this);
 			currentPosition.setChessPiece(null);
-			if(isPromotion)
-				piece.setType(toType);
+			/*if(isPromotion)
+				throws new PromotionChooseException("Must Choose Promotion");
+				piece = piece.newInstance(ChessData.getChessPieceClass(toType));*/
 			moveToPosition.setChessPiece(piece);
 			chess.history.add(this);
+			if(isPromotion)
+					throw new PromotionChooseException("Must Choose Promotion");
+		}
+	}
+	
+	public class PromotionChooseException extends Exception {
+		private static final long serialVersionUID = 1L;
+
+		public PromotionChooseException(String message) {
+			super(message);
+		}
+		
+		public void setPromotion(Piece type) {
+			toType = type;
+			if(isPromotion) {
+				ChessPiece piece = moveToPosition.getChessPiece();
+				piece = piece.newInstance(ChessData.getChessPieceClass(toType));
+				moveToPosition.setChessPiece(piece);
+			}
 		}
 	}
 	
@@ -473,5 +341,14 @@ public class ChessMove implements ChessData {
 	@Override
 	public String toString() {
 		return moveType + " - " + type + " : " + currentPosition + " -> " + moveToPosition;
+	}
+
+	public ChessPosition getCurrentPosition() {
+		return currentPosition;
+	}
+	
+	
+	public Chess getChess() {
+		return chess;
 	}
 }

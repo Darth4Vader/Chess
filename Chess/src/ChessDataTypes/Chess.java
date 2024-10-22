@@ -40,7 +40,9 @@ public class Chess implements ChessData {
 			for(int file = 0;file < FILE; file++) {
 				ChessPiece piece =  chess.getChessPiece(rank, file);
 				if(piece != null) {
-					ChessPiece newPiece = new ChessPiece(piece);
+					ChessPiece newPiece = piece.newInstance(); 
+					System.out.println(newPiece);
+							//new ChessPiece(piece);
 					setChessPiece(rank, file, newPiece);
 				}
 			}
@@ -145,7 +147,8 @@ public class Chess implements ChessData {
 					Piece type = ChessData.getChessPieceNumber(Character.toLowerCase(c));
 					if(type != Piece.PIECE_UNKOWN) {
 						TurnColor color = Character.isUpperCase(c) ? TurnColor.WHITE : TurnColor.BLACK;
-						ChessPiece piece = new ChessPiece(type, color);
+						ChessPiece piece = ChessPiece.newInstance(ChessData.getChessPieceClass(type), color); 
+								//new ChessPiece(type, color);
 						setChessPiece(rank, file, piece);
 						file++;
 					}

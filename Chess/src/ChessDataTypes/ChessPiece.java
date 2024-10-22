@@ -1,9 +1,14 @@
 package ChessDataTypes;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
+import ChessDataTypes.ChessMoves.PossibleMoves;
+
 /**
  * <code>ChessPiece</code> is an Object representing a playable chess piece
  */
-public class ChessPiece implements ChessData {
+public abstract class ChessPiece implements ChessData {
 	
 	/**
 	 * The <code>TurnColor</code> color of the <code>ChessPiece</code>
@@ -47,13 +52,48 @@ public class ChessPiece implements ChessData {
 	}
 	
     /**
-     * Constructs a Clone of a given <code>ChessPiece</code>
+     * Constructs a Clone of a given <code>ChessPiece</code>, of a type based on the input Piece type
+     * @param type the New Piece type
      * @param piece a given chess piece
      */
-	public ChessPiece(ChessPiece piece) {
-		this(piece.type, piece.color);
+	public ChessPiece(Piece type, ChessPiece piece) {
+		this(type, piece.color);
 		this.isFirstTurn = piece.isFirstTurn;
 		this.firstMove = piece.firstMove;
+	}
+	
+	/**
+	 * Constructs a Clone of a given <code>ChessPiece</code>, of a type based on the
+	 * input Piece Class
+	 * 
+	 * @param piece a given chess piece
+	 * @param clasz the new Piece Class
+	 */
+	public ChessPiece newInstance(Class<? extends ChessPiece> clasz) {
+		try {
+			return clasz.getDeclaredConstructor(ChessPiece.class).newInstance(this);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public ChessPiece newInstance() {
+		try {
+			return this.getClass().getDeclaredConstructor(ChessPiece.class).newInstance(this);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static ChessPiece newInstance(Class<? extends ChessPiece> clasz, TurnColor color) {
+		try {
+			return clasz.getDeclaredConstructor(TurnColor.class).newInstance(color);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	/**
@@ -145,4 +185,8 @@ public class ChessPiece implements ChessData {
 	public String toString() {
 		return type + " - " + color;
 	}
+	
+	public abstract List<PossibleMoves> getPossibleMoves(ChessPosition currentPosition);
+	
+	public abstract Move getMove(ChessMove chessMove);
 }

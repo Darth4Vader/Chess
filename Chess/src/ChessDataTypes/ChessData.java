@@ -1,5 +1,7 @@
 package ChessDataTypes;
 
+import ChessDataTypes.ChessData.Piece;
+
 public interface ChessData {
 	
 	public static final String START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
@@ -72,28 +74,46 @@ public interface ChessData {
 	}
 	
 	public static char getColorName(TurnColor color) {
-		if(color == TurnColor.WHITE) return 'w';
-		if(color == TurnColor.BLACK) return 'b';
-		return ' ';
+		return switch (color) {
+			case WHITE -> 'w';
+			case BLACK -> 'b';
+			default -> ' ';
+		};
 	}
 	
 	public static Piece getChessPieceNumber(char c) {
-		if(c == 'p') return Piece.PAWN;
-		else if(c == 'r') return Piece.ROOK;
-		else if(c == 'n') return Piece.KNIGHT;
-		else if(c == 'b') return Piece.BISHOP;
-		else if(c == 'q') return Piece.QUEEN;
-		else if(c == 'k') return Piece.KING;
-		return Piece.PIECE_UNKOWN;
+		return switch (c) {
+			case 'p' -> Piece.PAWN;
+			case 'r' -> Piece.ROOK;
+			case 'n' -> Piece.KNIGHT;
+			case 'b' -> Piece.BISHOP;
+			case 'q' -> Piece.QUEEN;
+			case 'k' -> Piece.KING;
+			default -> Piece.PIECE_UNKOWN;
+		};
 	}
 	
 	public static char getChessPieceName(Piece type) {
-		if(type == Piece.PAWN) return 'p';
-		else if(type == Piece.ROOK) return 'r';
-		else if(type == Piece.KNIGHT) return 'n';
-		else if(type == Piece.BISHOP) return 'b';
-		else if(type == Piece.QUEEN) return 'q';
-		else if(type == Piece.KING) return 'k';
-		return '?';
+		return switch (type) {
+			case PAWN -> 'p';
+			case ROOK -> 'r';
+			case KNIGHT -> 'n';
+			case BISHOP -> 'b';
+			case QUEEN -> 'q';
+			case KING -> 'k';
+			default -> '?';
+		};
+	}
+	
+	public static Class<? extends ChessPiece> getChessPieceClass(Piece type) {
+		return switch(type) {
+            case PAWN -> Pawn.class;
+            case ROOK -> Rook.class;
+            case KNIGHT -> Knight.class;
+            case BISHOP -> Bishop.class;
+            case QUEEN -> Queen.class;
+            case KING -> King.class;
+            default -> null;
+		};
 	}
 }

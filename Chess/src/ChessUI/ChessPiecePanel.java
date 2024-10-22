@@ -57,16 +57,14 @@ import ChessDataTypes.ChessPiece;
 import ChessDataTypes.ChessPosition;
 import SwingUtilities.SwingUtils;
 
-public class ChessPiecePanel extends JPanel implements FocusListener, MouseMotionListener, MouseListener, AncestorListener {
+public class ChessPiecePanel extends ChessPieceImage implements FocusListener, MouseMotionListener, MouseListener, AncestorListener {
 	
 	private ChessMain board;
-	private final ChessPiece piece;
 	private Piece currentType;
     private ChessPositionPanel position;
-    private Image image;
     
 	public ChessPiecePanel(ChessPiece piece, ChessMain board) {
-		this.piece = piece;
+		super(piece);
 		this.currentType = Piece.PIECE_UNKOWN;
 		this.board = board;
 		updateImage();
@@ -78,59 +76,51 @@ public class ChessPiecePanel extends JPanel implements FocusListener, MouseMotio
 		this.addMouseListener(this);
 	}
 	
-	public TurnColor getColor() {
-		return piece.getColor();
-	}
-	
-	public Piece getType() {
-		return piece.getType();
-	}
-	
-	public ChessPiece getChessPiece() {
-		return piece;
-	}
-	
 	public void setChessPositionPanel(ChessPositionPanel position) {
 		this.position = position;
 	}
 	
 	@Override
 	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
 		updateImage();
-		int width = (int)(getWidth()*0.7);
-		int height = (int)(getHeight()*0.7);
-		int x = (int)((getWidth() - width)*0.5);
-		int y = (int)((getHeight() - height)*0.5);
-		g.drawImage(image, x, y, width, height, this);
+		super.paintComponent(g);
 		//System.out.println(position.getPosition() + "  " + piece.getPosition());
 		checkUpdates();
 	}
 	
 	private void checkUpdates() {
 		ChessPosition positionPanel = this.position.getPosition();
-		ChessPosition currentPosition = piece.getPosition();
+		ChessPosition currentPosition = getChessPiece().getPosition();
 		//System.out.println("Lo " + positionPanel + "  " + currentPosition + "  " + (positionPanel != null && !positionPanel.equals(positionPanel)));
 		if(positionPanel != null && !positionPanel.equals(currentPosition)) {
 			System.out.println("Enter\n\n\n\n\n");
+			System.out.println(getChessPiece());
 			System.out.println(positionPanel + "  " + currentPosition);
+			System.out.println(positionPanel.getChessPiece());
 			this.position.setChessPiecePanel(null);
 			this.position = null;
 			if(currentPosition != null) {
 				this.position = board.getChessPositionPanel(currentPosition);
 				if(this.position != null) {
 					this.position.setChessPiecePanel(this);
-					//this.board.refreshFrame();
+				}
+			} else if(positionPanel != null) {
+				ChessPiece piece = positionPanel.getChessPiece();
+				if (piece != null) {
+					this.position = board.getChessPositionPanel(positionPanel);
+					if(this.position != null) {
+						this.position.setChessPiecePanel(new ChessPiecePanel(piece, board));
+					}
 				}
 			}
 		}
 	}
 	
 	private void updateImage() {
-		Piece type = this.piece.getType();
+		Piece type = this.getChessPiece().getType();
 		if(!type.equals(this.currentType)) {
 			this.currentType = type;
-			this.image = ChessMain.loadImage("/chess_save/" + ChessData.getFileName(piece) + ".png");
+			loadImage();
 		}
 	}
 	
@@ -260,11 +250,5 @@ public class ChessPiecePanel extends JPanel implements FocusListener, MouseMotio
 
 	@Override
 	public void ancestorMoved(AncestorEvent event) {}
-	
-	
-	@Override
-	public String toString() {
-		return piece != null ? piece.toString() : "Panel have no Piece";
-	}
 	
 }

@@ -2,8 +2,6 @@ package ChessDataTypes;
 import java.util.ArrayList;
 import java.util.List;
 
-import ChessDataTypes.ChessData.Move;
-
 public class ChessMoves implements ChessData {
 	
 	protected Chess chess;
@@ -11,98 +9,37 @@ public class ChessMoves implements ChessData {
 	private List<ChessMove> moves;
 	private ChessMove check; /* a piece can only check in 1 move the opposite king */
 	private int rank, file;
-	//private TurnColor color;
-	private ChessPiece piece;
-	protected boolean checkPositionEmpty;
 	
 	public ChessMoves(Chess chess, ChessPosition currentPosition) {
-		this(chess, currentPosition, false);
-	}
-	
-	public ChessMoves(Chess chess, ChessPosition currentPosition, boolean checkPositionEmpty) {
 		this.chess = chess;
-		this.checkPositionEmpty = checkPositionEmpty;
 		moves = new ArrayList<>();
 		check = null;
 		this.currentPosition = currentPosition;
 		rank = currentPosition.getRank();file = currentPosition.getFile();
-		piece = currentPosition.getChessPiece();
+		ChessPiece piece = currentPosition.getChessPiece();
 		if(piece == null) return;
-		Piece type = piece.getType();
-		TurnColor color = piece.getColor();
-		if(type == Piece.PAWN) {
-			if(color == TurnColor.BLACK) {
-				//Pawn Starts
-				if(rank == 1)
-					addPossibleMove(rank+2,file);
-				//Pawn Moves
-				addPossibleMove(rank+1, file);
-				//Pawn Captures
-				addPossibleMove(rank+1, file+1);
-				addPossibleMove(rank+1, file-1);
-			} else
-			if(color == TurnColor.WHITE) {
-				//Pawn Starts
-				if(rank == 6)
-					addPossibleMove(rank-2,file);
-				//Pawn Moves
-				addPossibleMove(rank-1, file);
-				//Pawn Captures
-				addPossibleMove(rank-1, file+1);
-				addPossibleMove(rank-1, file-1);
+		List<PossibleMoves> possibleMoves = piece.getPossibleMoves(currentPosition);
+		possibleMoves.stream().forEach(possibleMove -> {
+			if (possibleMove.isLoop) {
+				addPossibleMoves(possibleMove.rank, possibleMove.file);
+			} else {
+				addPossibleMove(possibleMove.rank, possibleMove.file);
 			}
-		}
-		else if(type == Piece.KNIGHT) {
-			addPossibleMove(rank-1, file-2);
-			addPossibleMove(rank-1, file+2);
-			addPossibleMove(rank+1, file-2);
-			addPossibleMove(rank+1, file+2);
-			addPossibleMove(rank-2, file-1);
-			addPossibleMove(rank-2, file+1);
-			addPossibleMove(rank+2, file-1);
-			addPossibleMove(rank+2, file+1);
-		} 
-		else if(type == Piece.KING) {
-			//Move
-			if(rank > 0) {
-				addPossibleMove(rank-1, file);
-				if(file > 0)
-					addPossibleMove(rank-1, file-1);
-				if(file < FILE-1)
-					addPossibleMove(rank-1, file+1);
-			}
-			if(rank < RANK-1) {
-				addPossibleMove(rank+1, file);
-				if(file > 0)
-					addPossibleMove(rank+1, file-1);
-				if(file < FILE-1)
-					addPossibleMove(rank+1, file+1);
-			}
-			if(file > 0)
-				addPossibleMove(rank, file-1);
-			if(file < FILE-1)
-				addPossibleMove(rank, file+1);
-			//Castling
-			if(piece.isFirstMove()) {
-				//System.out.println("Hollo How " + rank + "   " + (file-2) + " , " + (file+2));
-				addPossibleMove(rank, file-2);
-				//System.out.println("Bleach");
-				addPossibleMove(rank, file+2);
-			}
-		}
-		else {
-			if(type == Piece.BISHOP || type == Piece.QUEEN) {
-				addPossibleMoves(1,1);
-				addPossibleMoves(1,-1);
-				addPossibleMoves(-1,1);
-				addPossibleMoves(-1,-1);
-			}
-			if(type == Piece.ROOK || type == Piece.QUEEN) {
-				addPossibleMoves(1,0);
-				addPossibleMoves(-1,0);
-				addPossibleMoves(0,1);
-				addPossibleMoves(0,-1);
-			}
+		});
+	}
+	
+	public static class PossibleMoves {
+		private int rank, file;
+		private boolean isLoop;
+		
+		public PossibleMoves(int rank, int file) {
+            this(rank, file, false);
+        }
+		
+		public PossibleMoves(int rank, int file, boolean isLoop) {
+			this.rank = rank;
+			this.file = file;
+			this.isLoop = isLoop;
 		}
 	}
 	

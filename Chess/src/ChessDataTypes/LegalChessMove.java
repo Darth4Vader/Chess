@@ -41,7 +41,11 @@ public class LegalChessMove extends ChessMove {
 		if(moveType != Move.MOVE_UNKOWN) {
 			Chess chess = new Chess(this.chess);
 			ChessMove move = new ChessMove(this, chess);
-			move.initiateChange();
+			try {
+				move.initiateChange();
+			} catch (PromotionChooseException e) {
+				e.setPromotion(Piece.QUEEN);
+			}
 			chess.updateColorInCheck(color);
 			if(chess.isColorInCheck(color))
 				moveType = Move.MOVE_UNKOWN;
