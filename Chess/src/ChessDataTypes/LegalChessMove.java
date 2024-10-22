@@ -12,25 +12,25 @@ public class LegalChessMove extends ChessMove {
 		ChessPosition position = null;
 		if(this.moveType != Move.MOVE_UNKOWN)
 			if(type != Piece.KING && type != Piece.PAWN) {
-			for(int rank = 0;rank < RANK && moreThenOneType != true; rank++) {
-				for(int file = 0;file < FILE && moreThenOneType != true; file++) {
-					position = this.chess.getChessPosition(rank, file);
-					if(position != null && !position.equals(currentPosition)) {
-						piece = position.getChessPiece();
-						if(piece != null && piece.getType() == type && piece.getColor() == color) {
-							ChessMoves moves = new ChessMoves(this.chess, position);
-							if(moves.isPossibleMove(moveToPosition))
-								moreThenOneType = true;
+				for(int rank = 0;rank < RANK && moreThenOneType != true; rank++) {
+					for(int file = 0;file < FILE && moreThenOneType != true; file++) {
+						position = this.chess.getChessPosition(rank, file);
+						if(position != null && !position.equals(currentPosition)) {
+							piece = position.getChessPiece();
+							if(piece != null && piece.getType() == type && piece.getColor() == color) {
+								ChessMoves moves = new ChessMoves(this.chess, position);
+								if(moves.isPossibleMove(moveToPosition))
+									moreThenOneType = true;
+							}
 						}
 					}
 				}
-			}
-			if(moreThenOneType) {
-				if(position.getFile() == currentPosition.getFile())
-					pgnRank = true;
-				else
-					pgnFile = true;
-			}
+				if(moreThenOneType) {
+					if(position.getFile() == currentPosition.getFile())
+						pgnRank = true;
+					else
+						pgnFile = true;
+				}
 		}
 	}
 	

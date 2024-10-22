@@ -99,6 +99,17 @@ public class ChessPosition implements ChessData {
 	}
 	
 	/**
+	 * Returns <code>true</code> only if the <code>ChessPosition</code> contains a
+	 * <code>ChessPiece</code>.
+	 * 
+	 * @return <code>true</code>, if there is a <code>ChessPiece</code> inside the
+	 *         <code>ChessPosition</code>, otherwise returns <code>false</code>
+	 */
+	public boolean isPresent() {
+		return !isEmpty();
+	}
+	
+	/**
 	 * Returns the row number of a given rank number.
 	 * Rank number is in the order of 0 -> 8, from the bottom to the top.
 	 * Row number is in the order of 8 -> 0, from the top to the bottom.

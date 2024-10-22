@@ -18,7 +18,7 @@ public class ChessMoves implements ChessData {
 		rank = currentPosition.getRank();file = currentPosition.getFile();
 		ChessPiece piece = currentPosition.getChessPiece();
 		if(piece == null) return;
-		List<PossibleMoves> possibleMoves = piece.getPossibleMoves(currentPosition);
+		List<PossibleMoves> possibleMoves = piece.getPossibleMoves();
 		possibleMoves.stream().forEach(possibleMove -> {
 			if (possibleMove.isLoop) {
 				addPossibleMoves(possibleMove.rank, possibleMove.file);

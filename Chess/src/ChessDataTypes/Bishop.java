@@ -20,7 +20,7 @@ public class Bishop extends ChessPiece {
 	}
 	
 	@Override
-	public List<PossibleMoves> getPossibleMoves(ChessPosition currentPosition) {
+	public List<PossibleMoves> getPossibleMoves() {
 		List<PossibleMoves> moves = new ArrayList<>();
 		moves.add(new PossibleMoves(1,1, true));
 		moves.add(new PossibleMoves(1,-1, true));

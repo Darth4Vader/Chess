@@ -21,10 +21,10 @@ public class Pawn extends ChessPiece {
 	}
 	
 	@Override
-	public List<PossibleMoves> getPossibleMoves(ChessPosition currentPosition) {
+	public List<PossibleMoves> getPossibleMoves() {
         List<PossibleMoves> moves = new ArrayList<>();
-        int rank = currentPosition.getRank(), file = currentPosition.getFile();
-        TurnColor color = getColor();
+        int rank = getRank(), file = getFile();
+        TurnColor color = this.getColor();
         if(color == TurnColor.BLACK) {
             //Pawn Starts
             if(rank == 1)
@@ -50,13 +50,11 @@ public class Pawn extends ChessPiece {
 
 	@Override
 	public Move getMove(ChessMove chessMove) {
-		ChessPosition currentPosition = chessMove.getCurrentPosition();
 		ChessPosition moveToPosition = chessMove.getMoveToPosition();
-		int rank = currentPosition.getRank(), file = currentPosition.getFile();
+		int rank = getRank(), file = getFile();
 		int toRank = moveToPosition.getRank(), toFile = moveToPosition.getFile();
 		Chess chess = chessMove.getChess();
-		ChessPiece currentPiece = currentPosition.getChessPiece();
-		TurnColor color = currentPiece.getColor();
+		TurnColor color = this.getColor();
 		if(color == TurnColor.BLACK) {
 				//Pawn Starts
 				if(rank == 1)
@@ -87,9 +85,8 @@ public class Pawn extends ChessPiece {
 	private Move checkPawnCaptures(ChessMove chessMove) {
 		Move move = chessMove.isCapture();
 		ChessPosition moveToPosition = chessMove.getMoveToPosition();
-		if(!moveToPosition.isEmpty()) return move;
-		ChessPosition currentPosition = chessMove.getCurrentPosition();
-		int file = currentPosition.getFile();
+		if(moveToPosition.isPresent()) return move;
+		int file = getFile();
 		if(file > 0)
 			move = checkPawnEnPasent(0, -1, move, chessMove);
 		if(file < FILE-1)
@@ -99,10 +96,8 @@ public class Pawn extends ChessPiece {
 	
 	private Move checkPawnEnPasent(int rankLoop, int fileLoop, Move move, ChessMove chessMove) {
 		if(move != Move.MOVE_UNKOWN) return move;
-		ChessPosition currentPosition = chessMove.getCurrentPosition();
-		int rank = currentPosition.getRank(), file = currentPosition.getFile();
-		int toRank = rank + rankLoop;
-		int toFile = file + fileLoop;
+		int toRank = getRank() + rankLoop;
+		int toFile = getFile() + fileLoop;
 		Chess chess = chessMove.getChess();
 		ChessPosition playPosition = chess.getChessPosition(toRank, toFile);
 		boolean isLegal = checkPawnEnPasent(playPosition, chessMove);
@@ -121,9 +116,7 @@ public class Pawn extends ChessPiece {
 	private boolean checkPawnEnPasent(ChessPosition position, ChessMove chessMove) {
 		if(position == null) return false;
 		ChessPiece piece = position.getChessPiece();
-		ChessPosition currentPosition = chessMove.getCurrentPosition();
-		ChessPiece currentPiece = currentPosition.getChessPiece();
-		if(piece == null || currentPiece.isColor(piece) || !piece.isPiece(Piece.PAWN)) return false;
+		if(piece == null || this.isColor(piece) || !piece.isPiece(Piece.PAWN)) return false;
 		Chess chess = chessMove.getChess();
 		ChessPosition moveToPosition = chessMove.getMoveToPosition();
 		ChessMove lastOppositeMove = chess.getLastMove();
@@ -132,7 +125,7 @@ public class Pawn extends ChessPiece {
 			if(position.equals(lastMovedPosition)) {
 				if(lastOppositeMove.getMoveName() == Move.PAWN_START) {
 					int lastMovedRank = lastMovedPosition.getRank(), lastMovedFile = lastMovedPosition.getFile();
-					int rank = currentPosition.getRank(), file = currentPosition.getFile();
+					int rank = getRank(), file = getFile();
 					int toRank = moveToPosition.getRank(), toFile = moveToPosition.getFile();
 					if(lastMovedRank == rank && (lastMovedFile+1 == file || lastMovedFile-1 == file))
 						if((lastMovedRank-1 == toRank || lastMovedRank+1 == toRank) && lastMovedFile == toFile)

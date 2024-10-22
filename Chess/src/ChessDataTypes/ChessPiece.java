@@ -104,6 +104,14 @@ public abstract class ChessPiece implements ChessData {
 		return position;
 	}
 	
+	public int getRank() {
+		return position.getRank();
+	}
+	
+	public int getFile() {
+		return position.getFile();
+	}
+	
 	/**
 	 * Sets the <code>ChessPosition</code> position of the <code>ChessPiece</code>
 	 * @param position a given <code>ChessPosition</code> position to set.
@@ -186,7 +194,7 @@ public abstract class ChessPiece implements ChessData {
 		return type + " - " + color;
 	}
 	
-	public abstract List<PossibleMoves> getPossibleMoves(ChessPosition currentPosition);
+	public abstract List<PossibleMoves> getPossibleMoves();
 	
 	public abstract Move getMove(ChessMove chessMove);
 }

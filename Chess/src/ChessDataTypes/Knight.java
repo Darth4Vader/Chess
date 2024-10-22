@@ -19,9 +19,10 @@ public class Knight extends ChessPiece {
 	}
 	
 	@Override
-	public List<PossibleMoves> getPossibleMoves(ChessPosition currentPosition) {
+	public List<PossibleMoves> getPossibleMoves() {
         List<PossibleMoves> moves = new ArrayList<>();
-        int rank = currentPosition.getRank(), file = currentPosition.getFile();
+        ChessPosition pos = this.getPosition();
+        int rank = pos.getRank(), file = pos.getFile();
         //Move
         if(rank > 1) {
             moves.add(new PossibleMoves(rank-2, file-1));
@@ -44,9 +45,8 @@ public class Knight extends ChessPiece {
 
 	@Override
 	public Move getMove(ChessMove chessMove) {
-		ChessPosition currentPosition = chessMove.getCurrentPosition();
 		ChessPosition moveToPosition = chessMove.getMoveToPosition();
-		int rank = currentPosition.getRank(), file = currentPosition.getFile();
+		int rank = getRank(), file = getFile();
 		int toRank = moveToPosition.getRank(), toFile = moveToPosition.getFile();
 		if(rank-1 == toRank) {
 			if(file-2 == toFile)

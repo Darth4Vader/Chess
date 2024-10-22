@@ -111,6 +111,25 @@ public class Chess implements ChessData {
 		return position != null && position.isEmpty();
 	}
 	
+	public boolean isPathToPositionEmpty(ChessPosition pos1, ChessPosition pos2) {
+		int rank1 = pos1.getRank(), file1 = pos1.getFile();
+		int rank2 = pos2.getRank(), file2 = pos2.getFile();
+		if(rank1 != rank2) return false;
+		int fromFile, toFile;
+		if(file1 < file2) {
+			fromFile = file1;
+			toFile = file2;
+		}
+		else {
+			fromFile = file2;
+			toFile = file1;
+		}
+		for(int i = fromFile+1;i < toFile; i++)
+			if(!isPositionEmpty(rank1, i))
+				return false;
+		return true;
+	}
+	
 	public TurnColor getCurrentTurn() {
 		return this.currentTurn;
 	}
