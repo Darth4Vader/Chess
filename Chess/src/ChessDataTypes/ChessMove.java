@@ -15,7 +15,7 @@ public class ChessMove implements ChessData {
 	
 	protected boolean isCheckMate;
 	private int rank, file, toRank, toFile;
-	protected final TurnColor color;
+	private final TurnColor color;
 	private Piece type, toType;
 	private ChessPosition currentPosition, moveToPosition, playPosition;
 	private ChessPiece currentPiece;

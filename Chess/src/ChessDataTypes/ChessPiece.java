@@ -194,6 +194,10 @@ public abstract class ChessPiece implements ChessData {
 		return type + " - " + color;
 	}
 	
+	public boolean equalsPieceTypeColor(ChessPiece piece) {
+		return piece != null && piece.type == this.type && piece.color == this.color;
+	}
+	
 	public abstract List<PossibleMoves> getPossibleMoves();
 	
 	public abstract Move getMove(ChessMove chessMove);

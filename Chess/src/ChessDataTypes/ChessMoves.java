@@ -78,19 +78,11 @@ public class ChessMoves implements ChessData {
 	}
 	
 	public boolean isPossibleMove(ChessPosition position) {
-		for(ChessMove move : moves) {
-			if(move.getMoveToPosition().equals(position))
-				return true;
-		}
-		return false;
+		return this.moves.stream().anyMatch(move -> move.getMoveToPosition().equals(position));
 	}
 	
 	public boolean canAvoidCheck(ChessMoves oppositeMoves) {
-		for(ChessMove move : moves) {
-			if(oppositeMoves.isPossibleCheck(move.getMoveToPosition()) != true)
-				return true;
-		}
-		return false;
+		return this.moves.stream().anyMatch(move -> !oppositeMoves.isPossibleCheck(move.getMoveToPosition()));
 	}
 	
 	public boolean isPossibleCheck(ChessPosition position) {
