@@ -1,63 +1,33 @@
 package ChessUIJavaFX;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.HierarchyBoundsListener;
-import java.awt.event.HierarchyEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import javax.imageio.ImageIO;
-import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
-import javax.swing.border.Border;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
 
 import ChessDataTypes.Chess;
 import ChessDataTypes.ChessData;
 import ChessDataTypes.ChessData.Piece;
 import ChessDataTypes.ChessData.TurnColor;
 import FileUtilities.FilesUtils;
+import JavaFXUtilities.JavaFXUtils;
 import ChessDataTypes.ChessMove;
 import ChessDataTypes.ChessMoves;
 import ChessDataTypes.ChessPiece;
 import ChessDataTypes.ChessPosition;
 import SwingUtilities.SwingUtils;
+import javafx.collections.ListChangeListener;
+import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.effect.Light.Point;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Border;
+import javafx.scene.paint.Color;
 
-public class ChessPiecePanel extends ChessPieceImage implements FocusListener, MouseMotionListener, MouseListener, AncestorListener {
+public class ChessPiecePanel extends ChessPieceImage {
 	
 	private ChessMain board;
 	private Piece currentType;
@@ -68,12 +38,34 @@ public class ChessPiecePanel extends ChessPieceImage implements FocusListener, M
 		this.currentType = Piece.PIECE_UNKOWN;
 		this.board = board;
 		updateImage();
-		this.setOpaque(false);
-		this.addAncestorListener(this);
-		this.addFocusListener(this);
-		this.addMouseMotionListener(this);
-		this.addMouseListener(RemoveDragListener.createDefaultDragListener());
-		this.addMouseListener(this);
+		this.setOnMouseEntered((e) -> setCursor(Cursor.HAND));
+		this.focusedProperty().addListener((obs, oldVal, newVal) -> {
+			if (newVal) {
+				System.out.println("Currebt p " + position.getPosition() + " \n\n\n\n\n");
+				System.out.println("\n\n\n\n\n\n");
+				System.out.println(position.getPosition().getChessPiece());
+				possibleMoves = board.getChessBoard().getPossibleMoves(position.getPosition());
+				updateMovesPossibilities(true);
+			}
+			else {
+				updateMovesPossibilities(false);
+			}
+		});
+		this.parentProperty().addListener((obs, oldVal, newVal) -> {
+			if(newVal instanceof ChessPositionPanel) {
+				this.position = (ChessPositionPanel) newVal;
+			}
+		});
+		
+		this.setOnMousePressed((e) -> mousePressed(e));
+		this.setOnMouseReleased((e) -> mouseReleased(e));
+		
+		//this.setOpaque(false);
+		//this.addMouseListener(RemoveDragListener.createDefaultDragListener());
+		
+		this.setOnDragDetected((e) -> {
+			this.startFullDrag();
+		});
 	}
 	
 	public void setChessPositionPanel(ChessPositionPanel position) {
@@ -81,9 +73,9 @@ public class ChessPiecePanel extends ChessPieceImage implements FocusListener, M
 	}
 	
 	@Override
-	protected void paintComponent(Graphics g) {
+	protected void paintComponent() {
 		updateImage();
-		super.paintComponent(g);
+		super.paintComponent();
 		//System.out.println(position.getPosition() + "  " + piece.getPosition());
 		checkUpdates();
 	}
@@ -126,20 +118,6 @@ public class ChessPiecePanel extends ChessPieceImage implements FocusListener, M
 	
 	private ChessMoves possibleMoves;
 	
-	@Override
-	public void focusGained(FocusEvent e) {
-		System.out.println("Currebt p " + position.getPosition() + " \n\n\n\n\n");
-		System.out.println("\n\n\n\n\n\n");
-		System.out.println(position.getPosition().getChessPiece());
-		possibleMoves = board.getChessBoard().getPossibleMoves(position.getPosition());
-		updateMovesPossibilities(true);
-	}
-
-	@Override
-	public void focusLost(FocusEvent e) {
-		updateMovesPossibilities(false);
-	}
-	
 	private void updateMovesPossibilities(boolean canMove) {
 		if(possibleMoves != null) {
 	        for(ChessMove move : possibleMoves.getPossibleMoves()) {
@@ -148,30 +126,28 @@ public class ChessPiecePanel extends ChessPieceImage implements FocusListener, M
 	        	if(positionPanel != null)
 	        		positionPanel.setIfPossible(canMove);
 	        }
-	        board.refreshFrame();
 		}
 	}
 	
 	private ChessPositionPanel prevSquare;
 	private boolean canDrag;
 	private Border prevBorder;
-	private Point currentPoint = new Point(0,0);
-	private Point mouseDownCompCoords = new Point(0,0);
+	private Point2D currentPoint;
+	private Point2D mouseDownCompCoords = new Point2D(0,0);
 	
-	@Override
 	public void mouseDragged(MouseEvent e) {
 		if(canDrag == true) {
-		    Point currCoords = this.getLocation();
-		    Point newMouseDownCompCoords = e.getPoint();
-		    currentPoint = new Point(currCoords.x + newMouseDownCompCoords.x - mouseDownCompCoords.x, currCoords.y + newMouseDownCompCoords.y - mouseDownCompCoords.y);
-		    Dimension size = getSize();
-		    Rectangle bounds = board.getContentPane().getBounds();
-		    if(!(currentPoint.y + size.height > bounds.height) &&
-		    		!(currentPoint.x + size.width > bounds.width) &&
-		    		!(currentPoint.y < bounds.y) &&  !(currentPoint.x < bounds.x))
-		    	this.setLocation(currentPoint);
-		    Point point = new Point((int)(currentPoint.x + (this.getWidth()*0.5)), (int)(currentPoint.y + (this.getHeight()*0.5)));
-		    Component component = board.getContentPane().getComponentAt(point);
+		    Bounds currCoords = this.getBoundsInLocal();
+		    Point2D newMouseDownCompCoords = new Point2D(e.getX(), e.getY());
+		    currentPoint = new Point2D(currCoords.getMinX() + newMouseDownCompCoords.getX() - mouseDownCompCoords.getX(), currCoords.getMinY() + newMouseDownCompCoords.getY() - mouseDownCompCoords.getY());
+		    Bounds bounds = board.getBoundsInLocal();
+		    if(!(currentPoint.getY() + currCoords.getHeight() > bounds.getHeight()) &&
+		    		!(currentPoint.getX() + currCoords.getWidth() > bounds.getWidth()) &&
+		    		!(currentPoint.getY() < bounds.getMinY()) &&  !(currentPoint.getX() < bounds.getMinX())) {
+		    	this.relocate(currentPoint.getX(), currentPoint.getY());
+		    }
+		    Point2D point = new Point2D((int)(currentPoint.getX() + (this.getWidth()*0.5)), (int)(currentPoint.getY() + (this.getHeight()*0.5)));
+		    Node component = JavaFXUtils.pick(board, point.getX(), point.getY());
 			if(component instanceof ChessPositionPanel) {
 				ChessPositionPanel destPosition = (ChessPositionPanel) component;
 					
@@ -179,36 +155,32 @@ public class ChessPiecePanel extends ChessPieceImage implements FocusListener, M
 					if(prevSquare != null)
 						prevSquare.setBorder(prevBorder);
 					prevSquare = destPosition;prevBorder = prevSquare.getBorder();
-					destPosition.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+					destPosition.setBorder(Border.stroke(Color.DARKGRAY));
 				}
 			}
 		}
 	}
 
-	@Override
-	public void mouseMoved(MouseEvent e) {}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {}
-
-	@Override
 	public void mousePressed(MouseEvent e) {
-		this.requestFocusInWindow();
-		if(e.getButton() != MouseEvent.BUTTON1) return;
-		mouseDownCompCoords = e.getPoint();
-	    Point currCoords = this.getLocation();
-	    Point newMouseDownCompCoords = e.getPoint();
-	    currentPoint = new Point(currCoords.x + newMouseDownCompCoords.x - mouseDownCompCoords.x, currCoords.y + newMouseDownCompCoords.y - mouseDownCompCoords.y);
+		this.requestFocus();
+		if(e.getButton() != MouseButton.PRIMARY) return;
+		mouseDownCompCoords = new Point2D(e.getX(), e.getY());
+	    Bounds currCoords = this.getBoundsInLocal();
+	    Point2D newMouseDownCompCoords = new Point2D(e.getX(), e.getY());
+	    currentPoint = new Point2D(currCoords.getMinX() + newMouseDownCompCoords.getX() - mouseDownCompCoords.getX(), currCoords.getMinY() + newMouseDownCompCoords.getY() - mouseDownCompCoords.getY());
 		canDrag = true;
+		System.out.println("Pressed");
 	}
 
-	@Override
 	public void mouseReleased(MouseEvent e) {
-		if(e.getButton() != MouseEvent.BUTTON1) return;
+		if(e.getButton() != MouseButton.PRIMARY) return;
 		if(prevSquare != null)
 			prevSquare.setBorder(prevBorder);
-	    Point point = new Point((int)(currentPoint.x + (this.getWidth()*0.5)), (int)(currentPoint.y + (this.getHeight()*0.5)));
-		Component component = board.getContentPane().getComponentAt(point);
+	    Point2D point = new Point2D((int)(currentPoint.getX() + (this.getWidth()*0.5)), (int)(currentPoint.getY() + (this.getHeight()*0.5)));
+		System.out.println(point);
+	    Node component = null;//JavaFXUtils.pick(board, point.getX(), point.getY());
+		System.out.println("Sourced: " + e.getSource().getClass());
+		System.out.println("Comp: " + component);
 		if(component instanceof ChessPositionPanel && possibleMoves != null) {
 			ChessPositionPanel destPosition = (ChessPositionPanel) component;
 			List<ChessMove> list = possibleMoves.getPossibleMoves();
@@ -222,33 +194,10 @@ public class ChessPiecePanel extends ChessPieceImage implements FocusListener, M
 					}
 				}
 				if(b)
-					this.requestFocusInWindow();
+					this.requestFocus();
 			}
 		}
 		canDrag = false;
-		mouseDownCompCoords = new Point(0,0);
+		mouseDownCompCoords = new Point2D(0, 0);
 	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		this.setCursor(new Cursor(Cursor.HAND_CURSOR));		
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {}
-
-	@Override
-	public void ancestorAdded(AncestorEvent event) {
-		Component component = this.getParent();
-		if(component instanceof ChessPositionPanel && !(component instanceof JLayeredPane)) {
-			this.position = (ChessPositionPanel) component;
-		}
-	}
-
-	@Override
-	public void ancestorRemoved(AncestorEvent event) {}
-
-	@Override
-	public void ancestorMoved(AncestorEvent event) {}
-	
 }

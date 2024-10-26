@@ -6,7 +6,6 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Label;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -22,6 +21,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,14 +59,23 @@ import ChessDataTypes.ChessMoves;
 import ChessDataTypes.ChessPiece;
 import ChessDataTypes.ChessPosition;
 import FileUtilities.FilesUtils;
+import JavaFXUtilities.JavaFXUtils;
 import OtherUtilities.ImageUtils;
 import SwingUtilities.SwingUtils;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class ChessMain extends GridPane implements ChessData {
 	
@@ -84,7 +93,7 @@ public class ChessMain extends GridPane implements ChessData {
 	
 	public ChessMain(Chess chess) {
 		this.chess = chess;
-		this.arr = new ChessPositionPanel[8][8];
+		this.arr = new ChessPositionPanel[RANK][FILE];
 		this.whiteColor = Color.rgb(255, 229, 204);
 		this.blackColor = Color.rgb(255, 178, 102);
 		this.loadChessBoard();
@@ -108,10 +117,23 @@ public class ChessMain extends GridPane implements ChessData {
 	}
 	
 	public void loadChessBoard() {
-		for(int rank = 0;rank < 8; rank++) {
-			for(int file = 0;file < 8; file++) {
+		RowConstraints rc = new RowConstraints();
+		rc.setPercentHeight(100d / RANK);
+
+		for (int i = 0; i < RANK; i++) {
+		    this.getRowConstraints().add(rc);
+		}
+
+		ColumnConstraints cc = new ColumnConstraints();
+		cc.setPercentWidth(100d / FILE);
+
+		for (int i = 0; i < RANK; i++) {
+		    this.getColumnConstraints().add(cc);
+		}
+		for(int rank = 0;rank < RANK; rank++) {
+			for(int file = 0;file < FILE; file++) {
 				this.arr[rank][file] = new ChessPositionPanel(chess.getChessPosition(rank, file), this);
-				this.add(this.arr[rank][file], rank, file);
+				this.add(this.arr[rank][file], file, rank);
 			}
 		}
 	}
@@ -120,23 +142,18 @@ public class ChessMain extends GridPane implements ChessData {
 		try {
 			move.initiateChange();
 		} catch (PromotionChooseException promotionException) {
-			JPanel panel = new JPanel() {
-				/*@Override
-				public Dimension getSize() {
-					return this.getPreferredSize();
-				}*/
-				@Override
-				public Dimension getPreferredSize() {
-					//System.out.println("Hello " + SwingUtils.getRatioSize(ChessMain.this, 0.4, 0.4));
-                    Dimension size = ChessMain.this.getSize(); 
-					return new Dimension((int) (size.width*0.6), (int) (size.height*0.4));
-					//return SwingUtils.getRatioSize(ChessMain.this, 0.4, 0.4);
-				}
-			};
-			panel.setOpaque(false);
+			GridPane panel = new GridPane();
+			panel.prefWidthProperty().bind(this.widthProperty().multiply(0.6));
+			panel.prefHeightProperty().bind(this.heightProperty().multiply(0.4));
+			/*panel.setOpaque(false);
 			panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
-			panel.setLayout(new GridLayout());
-			JDialog dialog = new JDialog(this);
+			panel.setLayout(new GridLayout());*/
+			//DialogPane dialog = new DialogPane();
+			
+            final Stage dialog = new Stage();
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.initOwner(this.getScene().getWindow());
+			
 			Arrays.asList(Piece.QUEEN, Piece.BISHOP, Piece.KNIGHT, Piece.ROOK)
 					.stream()
 					.map((type) -> ChessData.getChessPieceClass(type))
@@ -155,47 +172,25 @@ public class ChessMain extends GridPane implements ChessData {
 						}*/
 					})
 					.forEach((chessPieceImage) -> {
-						chessPieceImage.addMouseListener(new MouseAdapter() {
-							@Override
-							public void mouseClicked(MouseEvent e) {
-								promotionException.setPromotion(chessPieceImage.getType());
-								refreshFrame();
-								dialog.dispose();
-							}
+						chessPieceImage.setOnMouseClicked((e) -> {
+							promotionException.setPromotion(chessPieceImage.getType());
+							dialog.close();
 						});
-						panel.add(chessPieceImage);
+						panel.getChildren().add(chessPieceImage);
 					});
-			dialog.setLayout(null);
-			dialog.setContentPane(panel);
-			dialog.pack();
-			dialog.setVisible(true);
+			dialog.setScene(new Scene(panel));
+			dialog.show();
 			//panel.add(new Label("ney wooo"));
 			//panel.setSize(100, 100);
 			//this.getLayeredPane().add(panel);
 		}
-		refreshFrame();
 		this.chess.switchTurn();
 		if(!this.chess.isGameActivate())
 			addVictoryPanel();
 	}
 	
 	public void addVictoryPanel() {
-		DialogPane dialogPane = new DialogPane();
-		JPanel panel = new JPanel() {
-			/*@Override
-			protected void paintComponent(Graphics g) {
-				super.paintComponent(g);
-				//System.out.println(getSize());
-				//g.drawString(str + " Won", 0, 0);
-			}*/
-			@Override
-			public Dimension getPreferredSize() {
-				return ChessMain.this.getSize();
-			}
-		};
-		panel.setLayout(new BorderLayout());
-		panel.setOpaque(false);
-		panel.setSize(panel.getPreferredSize());
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		String str = "";
 		TurnColor winner = chess.getWinner();
 		if(winner == TurnColor.DRAW) 
@@ -208,12 +203,8 @@ public class ChessMain extends GridPane implements ChessData {
 					str = "Black";
 			str += " Won";
 		}
-		JLabel lbl = new JLabel(str, SwingConstants.CENTER);
-		lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
-		lbl.setAlignmentY(Component.CENTER_ALIGNMENT);
-		panel.add(lbl);
-		panel.setSize(100, 50);
-		this.getLayeredPane().add(panel);
+		alert.setContentText(str);
+		alert.show();
 	}
 	
 	public ChessPositionPanel getChessPositionPanel(ChessPosition position) {
@@ -227,6 +218,6 @@ public class ChessMain extends GridPane implements ChessData {
 	}
 	
 	public static Image loadImage(String path) {
-		return ImageUtils.loadImage(FilesUtils.readResource(ChessMain.class, path));
+		return JavaFXUtils.getImageResource(ChessMain.class, path, false);
 	}
 }

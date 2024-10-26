@@ -9,13 +9,16 @@ import java.awt.event.MouseListener;
 
 import javax.swing.JLayeredPane;
 
+import javafx.scene.Node;
+
 public interface RemoveDragListener {
 	
 	public JLayeredPane removeWhenDragged();
 	
 	public void addAfterDragged();
 	
-	public static MouseListener createDefaultDragListener() {
+	/*
+	public static void createDefaultDragListener(Node node) {
 		return new MouseAdapter() {
 			
 			private RemoveDragListener mainContainer;
@@ -55,4 +58,5 @@ public interface RemoveDragListener {
 			
 		};
 	}
+	*/
 }

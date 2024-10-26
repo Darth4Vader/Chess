@@ -24,7 +24,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
-public class ChessPositionPanel extends BorderPane implements RemoveDragListener, ContainerListener, MouseListener {
+public class ChessPositionPanel extends BorderPane {
 	
 	private ChessMain board;
 	private final ChessPosition position;
@@ -38,11 +38,10 @@ public class ChessPositionPanel extends BorderPane implements RemoveDragListener
 		TurnColor color = position.getBackgroundColor();
 		this.setBackground(Background.fill(color == TurnColor.WHITE ? board.getWhiteColor() : board.getBlackColor()));
 		this.setBorder(Border.stroke(Color.GRAY));
-		this.addContainerListener(this);
 		this.setOnMousePressed(e -> {
             if(piece != null) {
                 if(e.getButton() == MouseButton.SECONDARY)
-                    piece.requestFocusInWindow();
+                    piece.requestFocus();
             }
             else
                 this.requestFocus();
@@ -50,13 +49,11 @@ public class ChessPositionPanel extends BorderPane implements RemoveDragListener
 		this.getChildren().addListener((ListChangeListener<javafx.scene.Node>) c -> {
             while(c.next()) {
                 if(c.wasAdded()) {
-                    for(Node node : c.getAddedSubList()) {
-	                    if(node instanceof ChessPiecePanel) {
-	                        piece = (ChessPiecePanel) node;
-	                        piece.setChessPositionPanel(this);
-	                    }
-                    }
+            		if(!board.getChessBoard().isGameActivate())
+            			board.addVictoryPanel();
                 }
+            }
+		});
 		initiateChessPiecePanel();
 	}
 	
@@ -64,6 +61,7 @@ public class ChessPositionPanel extends BorderPane implements RemoveDragListener
 		this.isPossible = isPossible;
 	}
 	
+	/*
 	@Override 
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -82,12 +80,14 @@ public class ChessPositionPanel extends BorderPane implements RemoveDragListener
 			}
 		}
 	}
+	*/
 	
 	private void initiateChessPiecePanel() {
 		ChessPiece piece = position.getChessPiece();
 		if(piece != null) {
 			this.piece = new ChessPiecePanel(piece, board);
 			this.piece.setChessPositionPanel(this);
+			System.out.println("Ready");
 			this.setCenter(this.piece);
 		}
 		else
@@ -95,11 +95,10 @@ public class ChessPositionPanel extends BorderPane implements RemoveDragListener
 	}
 	
 	public void setChessPiecePanel(ChessPiecePanel piece) {
-		removeAll();
+		getChildren().clear();
 		this.piece = piece;
 		if(this.piece != null)
 			this.setCenter(this.piece);
-		board.refreshFrame();
 	}
 	
 	public ChessPosition getPosition() {
@@ -114,11 +113,10 @@ public class ChessPositionPanel extends BorderPane implements RemoveDragListener
 		return piece;
 	}
 	
-	@Override
+	/*@Override
 	public JLayeredPane removeWhenDragged() {
 		if(piece != null) {
 			this.setCenter(null);
-			board.refreshFrame();
 		}
 		return board.getLayeredPane();
 		
@@ -128,15 +126,8 @@ public class ChessPositionPanel extends BorderPane implements RemoveDragListener
 	public void addAfterDragged() {
 		if(piece != null) {
 			this.setCenter(this.piece);
-			board.refreshFrame();
 		}
-	}
-
-	@Override
-	public void componentAdded(ContainerEvent e) {
-		if(!board.getChessBoard().isGameActivate())
-			board.addVictoryPanel();
-	}
+	}*/
 	
 	public boolean equals(ChessPositionPanel chessSquare) {
 		return getPosition().equals(chessSquare.getPosition());
