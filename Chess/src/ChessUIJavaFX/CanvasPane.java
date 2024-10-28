@@ -21,7 +21,7 @@ public class CanvasPane extends Pane {
 		this.heightProperty().addListener((obs, oldVal, newVal) -> {
 			paintComponent();
 		});
-		canvas.setMouseTransparent(false);
+		//canvas.setMouseTransparent(true);
 	}
 	
 	protected void paintComponent() {

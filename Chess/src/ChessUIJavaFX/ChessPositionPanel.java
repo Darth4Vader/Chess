@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.awt.event.MouseListener;
+import java.util.List;
 
 import javax.naming.InitialContext;
 import javax.swing.BorderFactory;
@@ -12,11 +13,14 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
 import ChessDataTypes.ChessData.TurnColor;
+import ChessDataTypes.ChessMove;
+import ChessDataTypes.ChessMoves;
 import ChessDataTypes.ChessPiece;
 import ChessDataTypes.ChessPosition;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
@@ -54,8 +58,112 @@ public class ChessPositionPanel extends BorderPane {
                 }
             }
 		});
+		this.setPickOnBounds(false);
+		//this.setOpacity(0.5);
 		initiateChessPiecePanel();
+		
+		this.setOnMouseDragEntered(e -> {
+			Object obj = e.getGestureSource();
+			if(obj instanceof ChessPiecePanel) {
+				ChessPiecePanel piece = (ChessPiecePanel)obj;
+				ChessPositionPanel source = piece.getChessPositionPanel();
+				if(!this.equals(source)) {
+					prevBorder = this.getBorder();
+					this.setBorder(Border.stroke(Color.BLUE
+					//Color.DARKGRAY
+					));
+				}
+			}
+		});
+		
+		/*
+		this.setOnMouseDragOver(e -> {
+			dragEvent = e;
+			Object obj = e.getGestureSource();
+			if(obj instanceof ChessPiecePanel) {
+				ChessPiecePanel piece = (ChessPiecePanel)obj;
+				ChessPositionPanel source = piece.getChessPositionPanel();
+				if(!this.equals(source)) {
+					prevBorder = this.getBorder();
+					this.setBorder(Border.stroke(Color.BLUE
+					//Color.DARKGRAY
+					));
+				}
+			}
+		});*/
+		
+		
+		this.setOnMouseDragExited(e -> {
+			System.out.println("Thisssss");
+			System.out.println(this);
+			if(prevBorder != null)
+				this.setBorder(prevBorder);
+		});
+		//this.setOnMouse
+		/*this.setOnMouseReleased(e -> {
+			System.out.println("SouRCE: " + e.getSource());
+			if(dragEvent == null) return;
+			Object obj = dragEvent.getGestureSource();
+			dragEvent = null;
+			if(obj instanceof ChessPiecePanel) {
+				ChessPiecePanel piece = (ChessPiecePanel)obj;
+				System.out.println("fool : " + obj + " " + this.getPosition());
+				ChessMoves possibleMoves = piece.getPossibleMoves(); 
+				boolean b = true;
+				System.out.println(possibleMoves);
+				if(possibleMoves != null) {
+					List<ChessMove> list = possibleMoves.getPossibleMoves();
+					if(list.size() != 0) {
+						for(ChessMove move : list) {
+							System.out.println("POS: " + move.getMoveToPosition() + " " + this.position);
+							if(this.position.equals(move.getMoveToPosition())) {
+								board.switchTurn(move);
+								System.out.println("Boston");
+								System.out.println();
+								b = false;
+								piece.checkUpdates();
+								break;
+							}
+						}
+						if(b)
+							this.requestFocus();
+					}
+				}
+			}
+		});*/
+		this.setOnMouseDragReleased(e -> {
+			Object obj = e.getGestureSource();
+			if(obj instanceof ChessPiecePanel) {
+				ChessPiecePanel piece = (ChessPiecePanel)obj;
+				System.out.println("fool : " + e.getGestureSource() + " " + this.getPosition());
+				ChessMoves possibleMoves = piece.getPossibleMoves(); 
+				boolean b = true;
+				System.out.println(possibleMoves);
+				if(possibleMoves != null) {
+					List<ChessMove> list = possibleMoves.getPossibleMoves();
+					if(list.size() != 0) {
+						for(ChessMove move : list) {
+							System.out.println("POS: " + move.getMoveToPosition() + " " + this.position);
+							if(this.position.equals(move.getMoveToPosition())) {
+								this.board.switchTurn(move);
+								System.out.println("Boston");
+								System.out.println();
+								b = false;
+								piece.checkUpdates();
+								break;
+							}
+						}
+						if(b)
+							this.requestFocus();
+					}
+				}
+			}
+		});
+		//this.setOnMouseDragOver(getOnDragDetected());
 	}
+	
+	private MouseDragEvent dragEvent;
+	private Border prevBorder;
 	
 	public void setIfPossible(boolean isPossible) {
 		this.isPossible = isPossible;

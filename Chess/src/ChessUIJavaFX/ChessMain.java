@@ -134,6 +134,15 @@ public class ChessMain extends GridPane implements ChessData {
 			for(int file = 0;file < FILE; file++) {
 				this.arr[rank][file] = new ChessPositionPanel(chess.getChessPosition(rank, file), this);
 				this.add(this.arr[rank][file], file, rank);
+				/*if(!(rank == 7 && file >= 1)) {
+					this.arr[rank][file] = new ChessPositionPanel(chess.getChessPosition(rank, file), this);
+					this.add(this.arr[rank][file], file, rank);
+				}
+				else {
+					ChessPosition position = chess.getChessPosition(rank, file);
+					this.arr[rank][file] = new ChessPositionPanel(new ChessPosition(position.getBackgroundColor(), rank, file), this);
+					this.add(new Pane(this.arr[rank][file]), file, rank);
+				}*/
 			}
 		}
 	}

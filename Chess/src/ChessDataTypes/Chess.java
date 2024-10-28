@@ -41,7 +41,7 @@ public class Chess implements ChessData {
 				ChessPiece piece =  chess.getChessPiece(rank, file);
 				if(piece != null) {
 					ChessPiece newPiece = piece.newInstance(); 
-					System.out.println(newPiece);
+					//System.out.println(newPiece);
 							//new ChessPiece(piece);
 					setChessPiece(rank, file, newPiece);
 				}
