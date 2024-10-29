@@ -18,7 +18,9 @@ import ChessDataTypes.ChessMoves;
 import ChessDataTypes.ChessPiece;
 import ChessDataTypes.ChessPosition;
 import javafx.collections.ListChangeListener;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
@@ -26,9 +28,10 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
-public class ChessPositionPanel extends BorderPane {
+public class ChessPositionPanel extends BorderPaneCanvasPane {
 	
 	private ChessMain board;
 	private final ChessPosition position;
@@ -50,7 +53,7 @@ public class ChessPositionPanel extends BorderPane {
             else
                 this.requestFocus();
         });
-		this.getChildren().addListener((ListChangeListener<javafx.scene.Node>) c -> {
+		this.getBorderPane().getChildren().addListener((ListChangeListener<javafx.scene.Node>) c -> {
             while(c.next()) {
                 if(c.wasAdded()) {
             		if(!board.getChessBoard().isGameActivate())
@@ -136,8 +139,7 @@ public class ChessPositionPanel extends BorderPane {
 			if(obj instanceof ChessPiecePanel) {
 				ChessPiecePanel piece = (ChessPiecePanel)obj;
 				System.out.println("fool : " + e.getGestureSource() + " " + this.getPosition());
-				ChessMoves possibleMoves = piece.getPossibleMoves(); 
-				boolean b = true;
+				ChessMoves possibleMoves = piece.getPossibleMoves();
 				System.out.println(possibleMoves);
 				if(possibleMoves != null) {
 					List<ChessMove> list = possibleMoves.getPossibleMoves();
@@ -148,13 +150,11 @@ public class ChessPositionPanel extends BorderPane {
 								this.board.switchTurn(move);
 								System.out.println("Boston");
 								System.out.println();
-								b = false;
 								piece.checkUpdates();
 								break;
 							}
 						}
-						if(b)
-							this.requestFocus();
+						this.requestFocus();
 					}
 				}
 			}
@@ -167,28 +167,36 @@ public class ChessPositionPanel extends BorderPane {
 	
 	public void setIfPossible(boolean isPossible) {
 		this.isPossible = isPossible;
+		paintComponent();
 	}
 	
-	/*
 	@Override 
-	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
+	protected void paintComponent() {
+		super.paintComponent();
+		System.out.println(canvas.getWidth() + " " + canvas.getHeight() + " " + getWidth() + " " + getHeight() + " " + position.getChessPiece() + " " );
+		if(this.piece != null)
+		System.out.println(this.piece.getWidth() + " " + this.piece.getHeight());
+		GraphicsContext gc = getCanvas().getGraphicsContext2D();
+		gc.clearRect(0, 0, getWidth(), getHeight());
 		if(isPossible) {
-			g.setColor(new Color(128, 128, 128, 150));
+			gc.setStroke(Color.rgb(128, 128, 128, 150/255.0));
+			gc.setFill(Color.rgb(128, 128, 128, 150/255.0));
+			System.out.println("Holsta: " + piece);
 			if(piece == null) {
 				int width = (int)(getWidth()*0.3);
 				int height = (int)(getHeight()*0.3);
 				int x = (int)((getWidth() - width)*0.5);
 				int y = (int)((getHeight() - height)*0.5);
-				g.drawOval(x, y, width, height);
-				g.fillOval(x, y, width, height);
+				gc.strokeOval(x, y, width, height);
+				//gc.drawOval(x, y, width, height);
+				gc.fillOval(x, y, width, height);
 			}
 			else {
-				g.drawOval(0, 0, getWidth(), getHeight());
+				gc.strokeOval(0, 0, getWidth(), getHeight());
+				//gc.drawOval(0, 0, getWidth(), getHeight());
 			}
 		}
 	}
-	*/
 	
 	private void initiateChessPiecePanel() {
 		ChessPiece piece = position.getChessPiece();
@@ -197,16 +205,24 @@ public class ChessPositionPanel extends BorderPane {
 			this.piece.setChessPositionPanel(this);
 			System.out.println("Ready");
 			this.setCenter(this.piece);
+			//this.getChildren().add(this.piece);
+			//StackPane.setAlignment(this.piece, Pos.CENTER);
 		}
 		else
 			this.piece = null;
 	}
 	
 	public void setChessPiecePanel(ChessPiecePanel piece) {
-		getChildren().clear();
+		this.setCenter(null);
 		this.piece = piece;
-		if(this.piece != null)
+		if(this.piece != null) {
+			System.out.println("Ready Or Not");
 			this.setCenter(this.piece);
+			//this.getChildren().add(this.piece);
+			//StackPane.setAlignment(this.piece, Pos.CENTER);
+		}
+		/*else
+			this.setCenter(null);*/
 	}
 	
 	public ChessPosition getPosition() {

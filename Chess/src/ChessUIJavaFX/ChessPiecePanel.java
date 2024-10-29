@@ -60,6 +60,7 @@ public class ChessPiecePanel extends ChessPieceImage {
 				updateMovesPossibilities(true);
 			}
 			else {
+				System.out.println("Bye: " + this + " " + position.getPosition());
 				updateMovesPossibilities(false);
 			}
 		});
@@ -139,9 +140,13 @@ public class ChessPiecePanel extends ChessPieceImage {
 			this.requestFocus();
 			x = e.getSceneX() - this.getTranslateX();
 			y = e.getSceneY() - this.getTranslateY();
-			this.getParent().toFront();
+			this.getParent().getParent().toFront();
 			//disable the cursor to work on the current piece, so the positions in the background can receive the mouse event
 			this.setMouseTransparent(true);
+			this.getParent().setMouseTransparent(true);
+			
+            startDragX = e.getSceneX();
+            startDragY = e.getSceneY();
 		});
 		this.setOnMouseDragged((e) -> {
 			this.setManaged(false);
@@ -151,9 +156,43 @@ public class ChessPiecePanel extends ChessPieceImage {
 	        /*this.setLayoutX(e.getSceneX() + x);
 	        this.setLayoutY(e.getSceneY() + y);*/
 		    
-			this.setTranslateX(e.getX() + this.getTranslateX());
-		    this.setTranslateY(e.getY() + this.getTranslateY());
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			/*this.setTranslateX(e.getX() + this.getTranslateX());
+		    this.setTranslateY(e.getY() + this.getTranslateY());*/
+			
+			System.out.println(e.getX() + "  " + e.getY() + "  ");
+			
+			/*this.setTranslateX(e.getX() + this.getTranslateX());
+		    this.setTranslateY(e.getY() + this.getTranslateY());*/
+			
+            this.setTranslateX(e.getSceneX() - startDragX);
+            this.setTranslateY(e.getSceneY() - startDragY);
             
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
 			/*
 			double deltaX = e.getX() - x;
             double deltaY = e.getY() - y;
@@ -208,6 +247,10 @@ public class ChessPiecePanel extends ChessPieceImage {
 	
 	private double x, y;
 	
+
+    private double startDragX;
+    private double startDragY;
+	
 	public void setChessPositionPanel(ChessPositionPanel position) {
 		this.position = position;
 	}
@@ -229,6 +272,7 @@ public class ChessPiecePanel extends ChessPieceImage {
 		
 		//enable the cursor to work on the current piece, after the dragging is finished
 		this.setMouseTransparent(false);
+		this.getParent().setMouseTransparent(false);
 	}
 	
 	@Override
