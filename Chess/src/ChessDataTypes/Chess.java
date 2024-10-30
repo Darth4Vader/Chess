@@ -237,7 +237,8 @@ public class Chess implements ChessData {
 	
 	public void switchTurn(TurnColor color) {
 		if(!this.isGameActivate) return;
-		updateColorInCheck(color);
+		updateColorInCheck(TurnColor.BLACK);
+		updateColorInCheck(TurnColor.WHITE);
 		if(isColorInCheck(color) && isMate(color))
 			this.isGameActivate = false;
 		if(this.isGameActivate) {
@@ -325,9 +326,11 @@ public class Chess implements ChessData {
 	}
 	
 	public boolean isColorInCheck(TurnColor color) {
-		if(color == TurnColor.WHITE) return this.isWhiteInCheck;
-		if(color == TurnColor.BLACK) return this.isBlackInCheck;
-		return false;
+		return switch (color) {
+			case WHITE -> this.isWhiteInCheck;
+			case BLACK -> this.isBlackInCheck;
+			default -> false;
+		};
 	}
 	
 	public void updateColorInCheck(TurnColor color) {
@@ -336,7 +339,11 @@ public class Chess implements ChessData {
 	}
 	
 	private ChessPiece getKingPiece(TurnColor color) {
-		return color == TurnColor.WHITE ? this.whiteKing : color == TurnColor.BLACK ?  this.blackKing : null;
+		return switch (color) {
+			case WHITE -> this.whiteKing;
+			case BLACK -> this.blackKing;
+			default -> null;
+		};
 	}
 	
 	public String getFEN() {

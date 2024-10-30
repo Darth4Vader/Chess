@@ -1,19 +1,11 @@
 package ChessUIJavaFX;
 
 import ChessDataTypes.ChessData;
-import ChessDataTypes.ChessPiece;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
-import java.awt.Dimension;
-import java.awt.Graphics;
-
-import javax.swing.JPanel;
-
 import ChessDataTypes.ChessData.Piece;
 import ChessDataTypes.ChessData.TurnColor;
+import ChessDataTypes.ChessPiece;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 
 public class ChessPieceImage extends CanvasPane {
 
@@ -23,14 +15,12 @@ public class ChessPieceImage extends CanvasPane {
 	public ChessPieceImage(ChessPiece piece) {
 		this.piece = piece;
 		loadImage();
-		//this.setOpacity(0);
 	}
 	
 	@Override
 	protected void paintComponent() {
 		int width = (int)(getWidth()*0.7);
 		int height = (int)(getHeight()*0.7);
-		System.out.println("width: " + width + " height: " + height);
 		int x = (int)((getWidth() - width)*0.5);
 		int y = (int)((getHeight() - height)*0.5);
 		GraphicsContext gc = getCanvas().getGraphicsContext2D();

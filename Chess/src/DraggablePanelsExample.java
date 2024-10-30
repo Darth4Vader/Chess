@@ -1,4 +1,4 @@
-package ChessUIJavaFX;
+
 
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;

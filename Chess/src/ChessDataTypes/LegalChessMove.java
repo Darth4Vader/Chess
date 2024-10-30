@@ -46,9 +46,9 @@ public class LegalChessMove extends ChessMove {
 			} catch (PromotionChooseException e) {
 				e.setPromotion(Piece.QUEEN);
 			}
-			TurnColor color = chess.getCurrentTurn();
-			chess.updateColorInCheck(color);
-			if(chess.isColorInCheck(color))
+			TurnColor currentPieceColor = this.getColor();
+			chess.updateColorInCheck(currentPieceColor);
+			if(chess.isColorInCheck(currentPieceColor))
 				moveType = Move.MOVE_UNKOWN;
 			this.isCheckMate = !chess.isGameActivate();
 		}
